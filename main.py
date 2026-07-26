@@ -21,7 +21,7 @@ CATEGORIES = [
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 client = genai.Client(api_key=GEMINI_API_KEY) if GEMINI_API_KEY else None
-MODELS_TO_TRY = ['gemini-2.0-flash-lite', 'gemini-1.5-flash-8b', 'gemini-2.0-flash']
+MODELS_TO_TRY = ['gemini-2.0-flash-lite', 'gemini-1.5-flash', 'gemini-2.0-flash']
 
 def generate_script():
     category = random.choice(CATEGORIES)
@@ -65,12 +65,15 @@ def create_video(category_name, audio_path="voice.mp3", output_path="final_short
     # Dark Premium Canvas (1080x1920 Shorts Format)
     bg = ColorClip(size=(1080, 1920), color=(15, 20, 32), duration=duration)
     
+    # Use standard Linux-supported font
+    font_style = 'DejaVu-Sans-Bold'
+
     # Header Tag
     header_clip = TextClip(
         text="🔥 NEXUS EARNING | DAILY SIDE-HUSTLE",
-        font_size=42,
+        font_size=40,
         color='cyan',
-        font='Arial-Bold',
+        font=font_style,
         method='caption',
         size=(950, None)
     ).with_position(('center', 250)).with_duration(duration)
@@ -79,9 +82,9 @@ def create_video(category_name, audio_path="voice.mp3", output_path="final_short
     title_text = f"TODAY'S IDEA:\n\n{category_name.upper()}"
     title_clip = TextClip(
         text=title_text,
-        font_size=52,
+        font_size=50,
         color='yellow',
-        font='Arial-Bold',
+        font=font_style,
         method='caption',
         size=(900, None)
     ).with_position(('center', 500)).with_duration(duration)
@@ -89,9 +92,9 @@ def create_video(category_name, audio_path="voice.mp3", output_path="final_short
     # Bottom Call to Action
     sub_clip = TextClip(
         text="👇 SUBSCRIBE FOR DAILY EARNING TIPS 👇",
-        font_size=38,
+        font_size=36,
         color='white',
-        font='Arial-Bold',
+        font=font_style,
         method='caption',
         size=(950, None)
     ).with_position(('center', 1500)).with_duration(duration)
