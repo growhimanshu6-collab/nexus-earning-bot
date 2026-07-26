@@ -20,6 +20,9 @@ CATEGORIES = [
     "AI tools to make money online"
 ]
 
+# Alternate models to try if quota hits
+MODELS_TO_TRY = ['gemini-2.0-flash-lite', 'gemini-1.5-flash-8b', 'gemini-2.0-flash']
+
 def generate_script():
     category = random.choice(CATEGORIES)
     prompt = f"""
@@ -30,18 +33,21 @@ def generate_script():
     - Output: Plain spoken text ONLY. No brackets, no captions, no metadata.
     """
     
-    for attempt in range(3):
+    for model_name in MODELS_TO_TRY:
         try:
+            print(f"Trying model: {model_name}...")
             response = client.models.generate_content(
-                model='gemini-2.0-flash',
+                model=model_name,
                 contents=prompt
             )
             return response.text.strip()
         except Exception as e:
-            print(f"⚠️ API Limit Hit, waiting 15 seconds... (Attempt {attempt+1}/3)")
-            time.sleep(15)
+            print(f"⚠️ {model_name} failed: {e}")
+            time.sleep(2)
             
-    raise RuntimeError("Failed to generate script after 3 attempts due to quota limits.")
+    # Backup script if API quotas fail completely
+    print("⚠️ API Quotas completely exhausted, using smart template script...")
+    return f"Kya aapko pata hai ki {category} se aap daily achhi earning kar sakte hain? Bas sahi AI tools aur platforms ka use karna hai. Aaj hi Nexus Earning par bio link check karein aur start karein!"
 
 # --- 2. VOICEOVER GENERATION ---
 async def generate_audio(text, output_file="voice.mp3"):
