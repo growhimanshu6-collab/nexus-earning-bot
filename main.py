@@ -12,10 +12,10 @@ from moviepy.video.compositing.CompositeVideoClip import CompositeVideoClip
 CATEGORIES = [
     "Passive income apps like Honeygain and Pawns.app to earn money sharing bandwidth",
     "Best micro-task apps to earn daily cash by completing simple online surveys",
-    "High-paying freelancing skills you can learn in 2026 with zero investment",
-    "AI tools that can help students make $10 a day online",
+    "High-paying freelancing skills you can learn with zero investment",
+    "AI tools that can help students make side income online",
     "Best websites to earn money by testing mobile games and apps",
-    "Student side-hustles with no startup money required in 2026",
+    "Student side-hustles with no startup money required",
     "How to monetize short-form videos on YouTube Shorts and Instagram Reels"
 ]
 
@@ -64,16 +64,12 @@ def create_video(category_name, audio_path="voice.mp3", output_path="final_short
 
     # Dark Premium Canvas (1080x1920 Shorts Format)
     bg = ColorClip(size=(1080, 1920), color=(15, 20, 32), duration=duration)
-    
-    # Use standard Linux-supported font
-    font_style = 'DejaVu-Sans-Bold'
 
     # Header Tag
     header_clip = TextClip(
         text="🔥 NEXUS EARNING | DAILY SIDE-HUSTLE",
         font_size=40,
         color='cyan',
-        font=font_style,
         method='caption',
         size=(950, None)
     ).with_position(('center', 250)).with_duration(duration)
@@ -82,9 +78,8 @@ def create_video(category_name, audio_path="voice.mp3", output_path="final_short
     title_text = f"TODAY'S IDEA:\n\n{category_name.upper()}"
     title_clip = TextClip(
         text=title_text,
-        font_size=50,
+        font_size=48,
         color='yellow',
-        font=font_style,
         method='caption',
         size=(900, None)
     ).with_position(('center', 500)).with_duration(duration)
@@ -94,7 +89,6 @@ def create_video(category_name, audio_path="voice.mp3", output_path="final_short
         text="👇 SUBSCRIBE FOR DAILY EARNING TIPS 👇",
         font_size=36,
         color='white',
-        font=font_style,
         method='caption',
         size=(950, None)
     ).with_position(('center', 1500)).with_duration(duration)
