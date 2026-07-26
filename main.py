@@ -2,7 +2,7 @@ import os
 import time
 import random
 import asyncio
-import urllib.request
+import requests
 from google import genai
 import edge_tts
 from moviepy.audio.io.AudioFileClip import AudioFileClip
@@ -21,12 +21,11 @@ CATEGORIES = [
     "How to monetize short-form videos on YouTube Shorts and Instagram Reels"
 ]
 
-# Royalty-free direct HD background video URLs (Money, Tech, Laptop, Mobile)
+# Direct HD Stock Video URLs (Working CDN Links)
 STOCK_BG_VIDEOS = [
-    "https://assets.mixkit.co/videos/preview/mixkit-counting-a-stack-of-us-dollars-40333-large.mp4",
-    "https://assets.mixkit.co/videos/preview/mixkit-hands-holding-a-smartphone-with-a-green-screen-41528-large.mp4",
-    "https://assets.mixkit.co/videos/preview/mixkit-person-typing-on-a-laptop-keyboard-41389-large.mp4",
-    "https://assets.mixkit.co/videos/preview/mixkit-man-working-on-his-laptop-308-large.mp4"
+    "https://cdn.pixabay.com/video/2021/04/12/70886-536968724_large.mp4",
+    "https://cdn.pixabay.com/video/2019/04/20/22906-331575797_large.mp4",
+    "https://cdn.pixabay.com/video/2020/05/25/40149-425211993_large.mp4"
 ]
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
@@ -67,11 +66,25 @@ async def generate_audio(text, output_file="voice.mp3"):
     communicate = edge_tts.Communicate(text, "hi-IN-MadhurNeural")
     await communicate.save(output_file)
 
-# --- 3. DOWNLOAD BACKGROUND VIDEO ---
+# --- 3. DOWNLOAD BACKGROUND VIDEO (FIXED 403 ERROR) ---
 def download_bg_video(output_path="bg_clip.mp4"):
     video_url = random.choice(STOCK_BG_VIDEOS)
     print(f"Downloading background stock video from: {video_url}")
-    urllib.request.urlretrieve(video_url, output_path)
+    
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36"
+    }
+    
+    try:
+        response = requests.get(video_url, headers=headers, stream=True)
+        response.raise_for_status()
+        with open(output_path, 'wb') as f:
+            for chunk in response.iter_content(chunk_size=8192):
+                f.write(chunk)
+        print("✅ Background Video Downloaded Successfully!")
+    except Exception as e:
+        print(f"⚠️ Download failed ({e}), creating fallback canvas...")
+        # Fallback empty video file marker
 
 # --- 4. PRO VIDEO ASSEMBLY WITH VIDEO BACKGROUND ---
 def create_video(category_name, audio_path="voice.mp3", bg_video_path="bg_clip.mp4", output_path="final_short.mp4"):
@@ -79,19 +92,20 @@ def create_video(category_name, audio_path="voice.mp3", bg_video_path="bg_clip.m
     duration = audio.duration
 
     # Load Background Stock Video Clip
-    try:
-        bg_clip = VideoFileClip(bg_video_path).without_audio()
-        # Loop background if audio is longer than clip
-        if bg_clip.duration < duration:
-            bg_clip = bg_clip.loop(duration=duration)
-        else:
-            bg_clip = bg_clip.subclip(0, duration)
-        
-        # Resize/Crop to 1080x1920 Shorts format
-        bg_clip = bg_clip.resized(height=1920)
-        bg_clip = bg_clip.cropped(x_center=bg_clip.w/2, width=1080)
-    except Exception as e:
-        print(f"⚠️ Video clip error: {e}, falling back to stylish background canvas")
+    if os.path.exists(bg_video_path) and os.path.getsize(bg_video_path) > 1000:
+        try:
+            bg_clip = VideoFileClip(bg_video_path).without_audio()
+            if bg_clip.duration < duration:
+                bg_clip = bg_clip.loop(duration=duration)
+            else:
+                bg_clip = bg_clip.subclip(0, duration)
+            
+            bg_clip = bg_clip.resized(height=1920)
+            bg_clip = bg_clip.cropped(x_center=bg_clip.w/2, width=1080)
+        except Exception as e:
+            print(f"⚠️ Video processing error: {e}, fallback canvas used")
+            bg_clip = ColorClip(size=(1080, 1920), color=(15, 23, 42), duration=duration)
+    else:
         bg_clip = ColorClip(size=(1080, 1920), color=(15, 23, 42), duration=duration)
 
     # Top Header Tag
